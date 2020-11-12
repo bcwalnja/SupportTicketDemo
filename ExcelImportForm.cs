@@ -18,6 +18,8 @@ using System.Collections;
 using DevExpress.XtraEditors;
 using SupportTicketDemo.BLL.Events;
 using DevExpress.Xpo.Metadata;
+using DevExpress.Xpo.DB;
+using DevExpress.Xpo.DB.Helpers;
 
 namespace SupportTicketDemo.Forms
 {
@@ -34,14 +36,47 @@ namespace SupportTicketDemo.Forms
         private GridColumn colImport;
         private GridColumn colProperty;
         private ExcelDataSource excelDataSource;
+        protected IDataLayer dataLayer;
 
         private delegate void ProgressDelegate(object sender, ImportEventArgs e);
 
         public ExcelImportForm()
         {
+            CreateInMemoryDataLayer();
+            CreateMockData();
+            
             InitializeComponent();
-            unitOfWork = new UnitOfWork();
+            unitOfWork = new UnitOfWork(dataLayer);
             MappingInfo = new List<DataMap>();
+        }
+
+        private void CreateInMemoryDataLayer()
+        {
+            IDataStore ds = new InMemoryDataStore(AutoCreateOption.DatabaseAndSchema);
+            dataLayer = new SimpleDataLayer(ds);
+        }
+
+        private void CreateMockData()
+        {
+            var uow = new UnitOfWork(dataLayer);
+            var xpcTags = new XPCollection<Tag>(uow);
+            if (xpcTags.Count == 0)
+            {
+                new Tag(uow)
+                {
+                    Name = "Farmer"
+                };
+            }
+            var xpcSources = new XPCollection<Source>(uow);
+            if (xpcSources.Count == 0)
+            {
+                new Source(uow)
+                {
+                    Name = $"Import {DateTime.Today:d}"
+                };
+            }
+
+            uow.CommitTransaction();
         }
 
         #region Methods

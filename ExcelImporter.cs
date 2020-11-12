@@ -114,7 +114,13 @@ namespace SupportTicketDemo.Classes
                     if (map.IsAssociation)
                     {
                         //TODO: figure out how to handle creating Many-to-Many entries
-                        //continue;
+                        var test = newObject.GetMemberValue(map.PropertyName);
+                        var test2 = (XPCollection)test;
+                        if (newObject.GetMemberValue(map.PropertyName) is XPCollection collection)
+                        {
+                            collection.Add(map.DefaultValue);
+                            continue;
+                        }
 
                         if (map.DefaultValue is XPObject targetType)
                         {
@@ -139,8 +145,12 @@ namespace SupportTicketDemo.Classes
 
                     SetFieldValue(newObject, map, value);
                 }
-                catch
+                catch (Exception ex)
                 {
+                    System.Diagnostics.Debug.WriteLine(ex.Message);
+                    System.Diagnostics.Debug.WriteLine(ex.StackTrace);
+                    System.Diagnostics.Debug.WriteLine(ex.InnerException?.Message);
+                    System.Diagnostics.Debug.WriteLine(ex.InnerException?.StackTrace);
                     continue;
                 }
             }
